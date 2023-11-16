@@ -4,7 +4,7 @@ import pandas as pd
 from PIL import Image
 
 # Load the pre-trained model
-pipe = pickle.load(open('Dataset_level1.pkl', 'rb'))
+pipe = pickle.load(open('pipe.pkl', 'rb'))
 
 # Define teams and cities
 teams = ['Australia', 'India', 'Bangladesh', 'New Zealand', 'South Africa', 'England', 'West Indies', 'Afghanistan', 'Pakistan', 'Sri Lanka']
