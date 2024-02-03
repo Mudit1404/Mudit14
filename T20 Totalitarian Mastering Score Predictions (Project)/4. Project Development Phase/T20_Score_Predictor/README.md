@@ -19,5 +19,3 @@ The objective of the T20 World Cup Score Prediction project is to forecast the c
 - ```Model Evaluation:``` Assess the performance of the XGBoost model by employing metrics such as mean absolute error, mean squared error, and R-squared. These metrics provide insights into the accuracy and predictive capability of the model.
 
 - ```Prediction:``` Apply the trained and optimized XGBoost model to make predictions for the total runs scored by a team in a T20 cricket match, utilizing the relevant features identified during the model training process.
-
-- ```Deployment:``` Implement the deployment of the XGBoost model as a web application on Streamlit Cloud.
