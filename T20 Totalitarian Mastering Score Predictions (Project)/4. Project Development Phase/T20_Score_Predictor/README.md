@@ -1,21 +1,17 @@
-# T20 World Cup Score Predictor
+## T20 World Cup Score Predictor: Project Overview
 
----
+The T20 World Cup Score Prediction project aims to utilize the XGBoost algorithm to forecast the total runs scored by a cricket team in a T20 match. XGBoost, known for its effectiveness in predictive analysis, is chosen for this task.
 
-## Project Description and Workflow
+### Workflow Breakdown:
 
-The objective of the T20 World Cup Score Prediction project is to forecast the cumulative runs a cricket team is expected to score in a T20 match, utilizing the XGBoost algorithm. XGBoost, a widely employed machine learning algorithm for predictive analysis, is employed for this purpose.
+- **Collecting Data:** Gather historical T20 cricket match data including team details, runs, wickets, and overs from diverse cricket databases or reputable websites.
 
-#### The workflow for the T20 World Cup Score Prediction project is as follows:
+- **Data Preprocessing:** Clean and preprocess the data to ensure accuracy, handling missing values, and engineering features.
 
-- ```Data Collection:``` Gather information on historical T20 cricket matches, encompassing details such as the participating teams, runs scored, wickets taken, overs bowled, and other pertinent data. Source this information from diverse cricket databases, APIs, or reputable websites dedicated to cricket statistics.
+- **Feature Selection:** Identify key features using correlation analysis and domain knowledge.
 
-- ```Data Preprocessing:``` Perform data cleaning and preprocessing procedures to guarantee consistency and accuracy. Tasks may include addressing missing values, managing categorical variables, and conducting feature engineering to enhance the quality of the dataset.
+- **Model Training:** Train an XGBoost model using the preprocessed data.
 
-- ```Feature Selection:``` Determine the most pertinent features for the prediction model by employing techniques like correlation analysis, feature importance ranking, and leveraging domain knowledge.
+- **Model Evaluation:** Assess model performance using metrics like mean absolute error and R-squared.
 
-- ```Model Training:``` Utilize the preprocessed data and the identified features to train an XGBoost model. XGBoost is a gradient boosting algorithm that employs decision trees as base learners for the training process.
-
-- ```Model Evaluation:``` Assess the performance of the XGBoost model by employing metrics such as mean absolute error, mean squared error, and R-squared. These metrics provide insights into the accuracy and predictive capability of the model.
-
-- ```Prediction:``` Apply the trained and optimized XGBoost model to make predictions for the total runs scored by a team in a T20 cricket match, utilizing the relevant features identified during the model training process.
+- **Making Predictions:** Utilize the trained XGBoost model to predict total runs scored by a team in a T20 match based on relevant features.
