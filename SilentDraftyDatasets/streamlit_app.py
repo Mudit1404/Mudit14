@@ -37,38 +37,33 @@ def analyze_sentiment(headlines):
 
 # 📊 **Main Dashboard Logic**
 if st.button("Analyze Market Data"):
-    col1, col2 = st.columns(2)
 
-    with col1:
-        # Fetch Stock Data
-        data = get_stock_data(stock_symbol)
+    # 📈 **Stock Price Chart (First)**
+    st.subheader("📉 Live Stock Price Chart")
+    data = get_stock_data(stock_symbol)
+    fig_stock = go.Figure(data=[go.Candlestick(x=data.index,
+                                               open=data["Open"],
+                                               high=data["High"],
+                                               low=data["Low"],
+                                               close=data["Close"])])
+    st.plotly_chart(fig_stock)
 
-        # 📈 **Stock Price Chart**
-        st.subheader("📉 Live Stock Price Chart")
-        fig = go.Figure(data=[go.Candlestick(x=data.index,
-                                             open=data["Open"],
-                                             high=data["High"],
-                                             low=data["Low"],
-                                             close=data["Close"])])
-        st.plotly_chart(fig)
+    # Fetch News & Analyze Sentiment
+    headlines = fetch_news(stock_symbol)
+    sentiment_results = analyze_sentiment(headlines)
 
-    with col2:
-        # Fetch News & Analyze Sentiment
-        headlines = fetch_news(stock_symbol)
-        sentiment_results = analyze_sentiment(headlines)
+    # Convert results into DataFrame
+    df_sentiment = pd.DataFrame(sentiment_results)
 
-        # Convert results into DataFrame
-        df_sentiment = pd.DataFrame(sentiment_results)
+    # 📊 **Sentiment Bar Chart (Second)**
+    st.subheader("📊 Sentiment Bar Chart")
+    fig_bar = px.bar(df_sentiment, x="sentiment_score", y="headline", orientation='h', 
+                     color="sentiment_score", color_continuous_scale="RdYlGn")
+    st.plotly_chart(fig_bar, use_container_width=True)
 
-        # 📊 **Bar Chart for News Sentiment**
-        st.subheader("📊 Sentiment Bar Chart")
-        fig_bar = px.bar(df_sentiment, x="sentiment_score", y="headline", orientation='h', 
-                         color="sentiment_score", color_continuous_scale="RdYlGn")
-        st.plotly_chart(fig_bar, use_container_width=True)
-
-        # 🔥 **Heatmap for Sentiment Scores**
-        st.subheader("🌡 Sentiment Heatmap")
-        fig_heatmap = px.imshow([df_sentiment["sentiment_score"]],
-                                labels=dict(x="News Headlines", y="Sentiment", color="Score"),
-                                x=df_sentiment["headline"], color_continuous_scale="RdYlGn")
-        st.plotly_chart(fig_heatmap, use_container_width=True)
+    # 🔥 **Sentiment Heatmap (Third)**
+    st.subheader("🌡 Sentiment Heatmap")
+    fig_heatmap = px.imshow([df_sentiment["sentiment_score"]],
+                            labels=dict(x="News Headlines", y="Sentiment", color="Score"),
+                            x=df_sentiment["headline"], color_continuous_scale="RdYlGn")
+    st.plotly_chart(fig_heatmap, use_container_width=True)
