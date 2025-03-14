@@ -46,7 +46,7 @@ if st.button("Analyze Market Data"):
                                                high=data["High"],
                                                low=data["Low"],
                                                close=data["Close"])])
-    st.plotly_chart(fig_stock)
+    st.plotly_chart(fig_stock, use_container_width=True)
 
     # Fetch News & Analyze Sentiment
     headlines = fetch_news(stock_symbol)
@@ -55,15 +55,23 @@ if st.button("Analyze Market Data"):
     # Convert results into DataFrame
     df_sentiment = pd.DataFrame(sentiment_results)
 
-    # 📊 **Sentiment Bar Chart (Second)**
+    # 📊 **Sentiment Bar Chart (Headlines on Top)**
     st.subheader("📊 Sentiment Bar Chart")
-    fig_bar = px.bar(df_sentiment, x="sentiment_score", y="headline", orientation='h', 
-                     color="sentiment_score", color_continuous_scale="RdYlGn")
+    fig_bar = px.bar(df_sentiment, x="sentiment_score", y=df_sentiment.index.astype(str), 
+                     text="headline", orientation='h', color="sentiment_score", 
+                     color_continuous_scale="RdYlGn")
+
+    fig_bar.update_traces(textposition="outside")  # Ensures headlines are readable
+    fig_bar.update_layout(yaxis=dict(title="News Headlines", showticklabels=False))  
     st.plotly_chart(fig_bar, use_container_width=True)
 
-    # 🔥 **Sentiment Heatmap (Third)**
+    # 🔥 **Sentiment Heatmap (No Overlapping)**
     st.subheader("🌡 Sentiment Heatmap")
-    fig_heatmap = px.imshow([df_sentiment["sentiment_score"]],
+    heatmap_data = pd.DataFrame([df_sentiment["sentiment_score"]], 
+                                columns=df_sentiment["headline"])
+
+    fig_heatmap = px.imshow(heatmap_data, 
                             labels=dict(x="News Headlines", y="Sentiment", color="Score"),
-                            x=df_sentiment["headline"], color_continuous_scale="RdYlGn")
+                            color_continuous_scale="RdYlGn")
+
     st.plotly_chart(fig_heatmap, use_container_width=True)
