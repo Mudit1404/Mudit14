@@ -1,0 +1,10 @@
+streamlit
+fastapi
+uvicorn
+yfinance
+pandas
+requests
+vaderSentiment
+plotly
+feedparser
+textblob
