@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 import feedparser
 from textblob import TextBlob
 import plotly.express as px
+import numpy as np  # Added for reshaping data
 
 # Set up Streamlit page
 st.set_page_config(page_title="Stock & News Sentiment Dashboard", layout="wide")
@@ -46,6 +47,7 @@ if st.button("Analyze Market Data"):
                                                high=data["High"],
                                                low=data["Low"],
                                                close=data["Close"])])
+
     st.plotly_chart(fig_stock)
 
     # Fetch News & Analyze Sentiment
@@ -57,13 +59,30 @@ if st.button("Analyze Market Data"):
 
     # 📊 **Sentiment Bar Chart (Second)**
     st.subheader("📊 Sentiment Bar Chart")
-    fig_bar = px.bar(df_sentiment, x="sentiment_score", y="headline", orientation='h', 
-                     color="sentiment_score", color_continuous_scale="RdYlGn")
+    fig_bar = px.bar(df_sentiment, x="sentiment_score", y=df_sentiment.index.astype(str), 
+                     text="headline", orientation='h', color="sentiment_score", 
+                     color_continuous_scale="RdYlGn")
+
+    fig_bar.update_traces(textposition="outside")  # Make headlines readable
+    fig_bar.update_layout(yaxis=dict(title="News Headlines", showticklabels=False))  
     st.plotly_chart(fig_bar, use_container_width=True)
 
-    # 🔥 **Sentiment Heatmap (Third)**
+    # 🔥 **Sentiment Heatmap (Fixed Display)**
     st.subheader("🌡 Sentiment Heatmap")
-    fig_heatmap = px.imshow([df_sentiment["sentiment_score"]],
-                            labels=dict(x="News Headlines", y="Sentiment", color="Score"),
-                            x=df_sentiment["headline"], color_continuous_scale="RdYlGn")
+
+    # Convert sentiment scores to 2D array for proper display
+    sentiment_matrix = np.array(df_sentiment["sentiment_score"]).reshape(1, -1)
+
+    fig_heatmap = px.imshow(sentiment_matrix,
+                            labels=dict(x="News Headlines", y="Sentiment Score", color="Score"),
+                            x=df_sentiment["headline"], 
+                            color_continuous_scale="RdYlGn")
+
+    fig_heatmap.update_layout(
+        xaxis=dict(tickangle=45, tickmode="array", tickvals=list(range(len(df_sentiment))),
+                   ticktext=df_sentiment["headline"]),  # Ensure text doesn't overlap
+        yaxis=dict(title="Sentiment", tickvals=[]),  # Remove unnecessary Y ticks
+        coloraxis_colorbar=dict(title="Sentiment Score")  # Ensure proper color legend
+    )
+
     st.plotly_chart(fig_heatmap, use_container_width=True)
