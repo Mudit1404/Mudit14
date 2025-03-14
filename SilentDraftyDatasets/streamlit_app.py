@@ -21,6 +21,19 @@ def get_stock_data(symbol):
     return hist
 
 
+# Function to get the current stock price
+def get_current_price(symbol):
+    stock = yf.Ticker(symbol)
+    data = stock.history(period="1d")  # Fetch today's stock data
+    if not data.empty:
+        current_price = data["Close"].iloc[-1]  # Last closing price
+        previous_close = data["Close"].iloc[-2] if len(data) > 1 else current_price
+        price_change = current_price - previous_close
+        percentage_change = (price_change / previous_close) * 100 if previous_close != 0 else 0
+        return current_price, price_change, percentage_change
+    return None, None, None
+
+
 # Function to fetch Google News headlines
 def fetch_news(stock_symbol):
     rss_url = f"https://news.google.com/rss/search?q={stock_symbol}%20stock&hl=en-US&gl=US&ceid=US:en"
@@ -38,7 +51,28 @@ def analyze_sentiment(headlines):
 # 📊 **Main Dashboard Logic**
 if st.button("Analyze Market Data"):
 
-    # 📈 **Stock Price Chart (First)**
+    # 📌 **Fetch & Display Current Stock Price**
+    st.subheader("💰 Current Stock Price")
+    current_price, price_change, percentage_change = get_current_price(stock_symbol)
+
+    if current_price is not None:
+        # Create three columns to display the price data neatly
+        col1, col2, col3 = st.columns(3)
+
+        # Current Price
+        col1.metric(label="📌 Current Price", value=f"${current_price:.2f}")
+
+        # Daily Price Change
+        change_color = "green" if price_change >= 0 else "red"
+        col2.metric(label="📈 Change", value=f"${price_change:.2f}", delta=f"{percentage_change:.2f}%", delta_color=change_color)
+
+        # Percentage Change
+        col3.metric(label="📊 Percentage Change", value=f"{percentage_change:.2f}%", delta_color=change_color)
+
+    else:
+        st.warning("⚠ Unable to retrieve stock price data.")
+
+    # 📈 **Stock Price Chart**
     st.subheader("📉 Live Stock Price Chart")
     data = get_stock_data(stock_symbol)
     fig_stock = go.Figure(data=[go.Candlestick(x=data.index,
@@ -55,13 +89,13 @@ if st.button("Analyze Market Data"):
     # Convert results into DataFrame
     df_sentiment = pd.DataFrame(sentiment_results)
 
-    # 📊 **Sentiment Bar Chart (Second)**
+    # 📊 **Sentiment Bar Chart**
     st.subheader("📊 Sentiment Bar Chart")
     fig_bar = px.bar(df_sentiment, x="sentiment_score", y="headline", orientation='h', 
                      color="sentiment_score", color_continuous_scale="RdYlGn")
     st.plotly_chart(fig_bar, use_container_width=True)
 
-    # 🔥 **Sentiment Heatmap (Third)**
+    # 🔥 **Sentiment Heatmap**
     st.subheader("🌡 Sentiment Heatmap")
     fig_heatmap = px.imshow([df_sentiment["sentiment_score"]],
                             labels=dict(x="News Headlines", y="Sentiment", color="Score"),
