@@ -9,16 +9,16 @@ import requests
 
 # Clean script: removes only stage directions and formatting
 def clean_script_for_tts(raw_script: str) -> str:
-    cleaned_lines = []
-    for line in raw_script.split("\n"):
-        line = line.strip()
-        if re.fullmatch(r"[\*\(\)].*", line):
-            continue
-        if line.startswith("*") or line.startswith("(") or line.startswith("**"):
-            continue
-        if len(line.strip()) > 0:
-            cleaned_lines.append(line)
-    return " ".join(cleaned_lines)
+    # Remove content between asterisks
+    text = re.sub(r'\*[^*]+\*', '', raw_script)
+    # Remove content between parentheses
+    text = re.sub(r'\([^)]+\)', '', text)
+    # Remove any remaining asterisks
+    text = text.replace('*', '')
+    # Split into lines, clean and rejoin
+    lines = [line.strip() for line in text.split('\n')]
+    lines = [line for line in lines if line]
+    return ' '.join(lines)
 
 # Gemini setup
 genai.configure(api_key="AIzaSyAcba9ishOsQbrkNHA6Mv-DnhoPTreZPuU")
@@ -69,13 +69,13 @@ if st.button("🎙️ Generate My Story"):
         st.subheader("🧼 Cleaned Story for Audio")
         st.text_area("", cleaned_story, height=200)
 
-        # Select background music based on mood from local files
+        # Select background music from GitHub raw URLs
         mood_music = {
-            "Motivated": "bg_music/motivated.mp3",
-            "Calm": "bg_music/calm.mp3",
-            "Romantic": "bg_music/romantic.mp3",
-            "Curious": "bg_music/curious.mp3",
-            "Emotional": "bg_music/emotional.mp3"
+            "Motivated": "https://raw.githubusercontent.com/Mudit1404/Mudit14/Main/Kuku-FM/bg_music/motivated.mp3",
+            "Calm": "https://raw.githubusercontent.com/Mudit1404/Mudit14/Main/Kuku-FM/bg_music/calm.mp3",
+            "Romantic": "https://raw.githubusercontent.com/Mudit1404/Mudit14/Main/Kuku-FM/bg_music/romantic.mp3",
+            "Curious": "https://raw.githubusercontent.com/Mudit1404/Mudit14/Main/Kuku-FM/bg_music/curious.mp3",
+            "Emotional": "https://raw.githubusercontent.com/Mudit1404/Mudit14/Main/Kuku-FM/bg_music/emotional.mp3"
         }
 
         try:
@@ -88,14 +88,13 @@ if st.button("🎙️ Generate My Story"):
             tts.write_to_fp(speech_io)
             speech_io.seek(0)
 
-            # Load background music from local file
-            bg_music_path = mood_music[mood]
-            if not os.path.exists(bg_music_path):
-                raise FileNotFoundError(f"Background music file not found: {bg_music_path}")
-
+            # Load background music from GitHub URL
+            bg_music_url = mood_music[mood]
+            response = requests.get(bg_music_url)
+            
             # Load audio files with pydub
             speech_audio = AudioSegment.from_mp3(speech_io)
-            bg_audio = AudioSegment.from_mp3(bg_music_path)
+            bg_audio = AudioSegment.from_mp3(BytesIO(response.content))
 
             # Adjust background volume and duration
             bg_audio = bg_audio - 10  # Reduce volume by 10dB
