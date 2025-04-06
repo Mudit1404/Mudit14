@@ -1,3 +1,4 @@
+
 import streamlit as st
 import google.generativeai as genai
 from gtts import gTTS
@@ -6,18 +7,30 @@ import re
 from pydub import AudioSegment
 from io import BytesIO
 
-# Clean script: removes only stage directions and formatting
+
 def clean_script_for_tts(raw_script: str) -> str:
     cleaned_lines = []
     for line in raw_script.split("\n"):
         line = line.strip()
-        if re.fullmatch(r"[\*\(\)].*", line):
+
+        # Skip lines that are only sound cues or formatting
+        if re.fullmatch(r"\*.*?\*", line):
             continue
-        if line.startswith("*") or line.startswith("(") or line.startswith("**"):
+        if re.fullmatch(r"\(.*?\)", line):
             continue
-        if len(line.strip()) > 0:
+        if not line:
+            continue
+
+        # Remove inline sound cues like *footsteps*
+        line = re.sub(r"\*.*?\*", "", line)
+        line = re.sub(r"\(.*?\)", "", line)
+
+        # Only keep non-empty, clean lines
+        if line.strip():
             cleaned_lines.append(line)
+
     return " ".join(cleaned_lines)
+
 
 # Gemini setup
 genai.configure(api_key="AIzaSyAcba9ishOsQbrkNHA6Mv-DnhoPTreZPuU")
