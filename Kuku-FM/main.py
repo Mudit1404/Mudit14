@@ -7,8 +7,9 @@ import re
 import requests
 from pydub import AudioSegment
 from io import BytesIO
+from pydub.utils import which
 
-
+AudioSegment.converter = which("ffmpeg")
 def clean_script_for_tts(raw_script: str) -> str:
     cleaned_lines = []
     for line in raw_script.split("\n"):
