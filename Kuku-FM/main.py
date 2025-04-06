@@ -5,6 +5,7 @@ from gtts import gTTS
 import os
 import re
 import requests
+import ffmpeg
 from pydub import AudioSegment
 from io import BytesIO
 from pydub.utils import which
