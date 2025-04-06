@@ -4,6 +4,7 @@ import google.generativeai as genai
 from gtts import gTTS
 import os
 import re
+import requests
 from pydub import AudioSegment
 from io import BytesIO
 
@@ -79,13 +80,13 @@ if st.button("🎙️ Generate My Story"):
         st.subheader("🧼 Cleaned Story for Audio")
         st.text_area("", cleaned_story, height=200)
 
-        # Background music paths (ensure filenames are all lowercase!)
-        mood_music_paths = {
-            "motivated": "bg_music/motivated.mp3",
-            "calm": "bg_music/calm.mp3",
-            "romantic": "bg_music/romantic.mp3",
-            "curious": "bg_music/curious.mp3",
-            "emotional": "bg_music/emotional.mp3"
+        # Background music URLs
+        mood_music_urls = {
+            "motivated": "https://github.com/Mudit1404/Mudit14/blob/a5884aa8c1b7e02fcb053e223fa2a8c693b43f64/Kuku-FM/bg_music/motivated.mp3",
+            "calm": "https://github.com/Mudit1404/Mudit14/blob/a5884aa8c1b7e02fcb053e223fa2a8c693b43f64/Kuku-FM/bg_music/calm.mp3",
+            "romantic": "https://github.com/Mudit1404/Mudit14/blob/a5884aa8c1b7e02fcb053e223fa2a8c693b43f64/Kuku-FM/bg_music/romantic.mp3",
+            "curious": "https://github.com/Mudit1404/Mudit14/blob/a5884aa8c1b7e02fcb053e223fa2a8c693b43f64/Kuku-FM/bg_music/curious.mp3",
+            "emotional": "https://github.com/Mudit1404/Mudit14/blob/a5884aa8c1b7e02fcb053e223fa2a8c693b43f64/Kuku-FM/bg_music/emotional.mp3"
         }
 
         try:
@@ -99,14 +100,18 @@ if st.button("🎙️ Generate My Story"):
 
             speech_audio = AudioSegment.from_mp3(speech_io)
 
-            # Load background music
+            # Load background music from URL
             mood_key = mood.lower()
-            bg_music_path = mood_music_paths.get(mood_key)
+            url = mood_music_urls.get(mood_key)
+            
+            if not url:
+                raise ValueError(f"No background music URL found for mood: {mood_key}")
 
-            if not bg_music_path or not os.path.exists(bg_music_path):
-                raise FileNotFoundError(f"Background music for mood '{mood}' not found at {bg_music_path}")
+            response = requests.get(url)
+            if response.status_code != 200:
+                raise Exception(f"Failed to download background music for mood '{mood_key}'. Status code: {response.status_code}")
 
-            bg_audio = AudioSegment.from_mp3(bg_music_path)
+            bg_audio = AudioSegment.from_mp3(BytesIO(response.content))
             bg_audio = bg_audio - 10  # lower bg music volume
             bg_audio = bg_audio * (len(speech_audio) // len(bg_audio) + 1)
             bg_audio = bg_audio[:len(speech_audio)]
