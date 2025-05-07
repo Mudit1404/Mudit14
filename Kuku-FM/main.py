@@ -56,9 +56,18 @@ if st.button("🎙️ Generate My Story"):
         }
 
         try:
+            # Send the API request
             res = requests.post(PERPLEXITY_URL, headers=headers, json=payload)
+            
+            # Check if the response status code is 200
             res.raise_for_status()
-            story = res.json()["choices"][0]["message"]["content"].strip()
+
+            # Process the response
+            story = res.json().get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+
+            if not story:
+                st.error("No story was generated. Please try again.")
+                st.stop()
 
             cleaned_story = clean_script_for_tts(story)
             word_count = len(cleaned_story.split())
@@ -73,6 +82,7 @@ if st.button("🎙️ Generate My Story"):
             st.subheader("🧼 Cleaned Story for Audio")
             st.text_area("", cleaned_story, height=200)
 
+            # Background music paths (ensure filenames are all lowercase!)
             mood_music_paths = {
                 "motivated": "bg_music/motivated.mp3",
                 "calm": "bg_music/calm.mp3",
@@ -105,5 +115,8 @@ if st.button("🎙️ Generate My Story"):
             st.subheader("🔊 Your Personalized Audio with Background Music")
             st.audio(output_io)
 
+        except requests.exceptions.HTTPError as e:
+            # If there's a 400 error, show a message with the response
+            st.error(f"An error occurred: {e.response.json().get('message', 'Unknown error occurred')}")
         except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
+            st.error(f"An unexpected error occurred: {str(e)}")
