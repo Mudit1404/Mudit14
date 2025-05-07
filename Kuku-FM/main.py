@@ -6,7 +6,7 @@ import re
 from openai import OpenAI
 from pydub import AudioSegment
 from io import BytesIO
-client = OpenAI(api_key="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")
+client = OpenAI(api_key="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")
 def clean_script_for_tts(raw_script: str) -> str:
     cleaned_lines = []
     for line in raw_script.split("\n"):
