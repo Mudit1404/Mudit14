@@ -6,8 +6,8 @@ import re
 from pydub import AudioSegment
 from io import BytesIO
 
-# 🔐 Set your OpenAI API key here (or load from env)
-openai.api_key = "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"  # Replace with your actual key
+# 🔐 Initialize OpenAI client
+client = openai.OpenAI(api_key="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")  # Use an env variable in production
 
 def clean_script_for_tts(raw_script: str) -> str:
     cleaned_lines = []
@@ -39,15 +39,13 @@ if st.button("🎙️ Generate My Story"):
         )
 
         try:
-client = openai.OpenAI(api_key="your_openai_api_key_here")
-
-response = client.chat.completions.create(
-    model="gpt-4",
-    messages=[{"role": "user", "content": prompt_text}],
-    temperature=0.8,
-    max_tokens=2048
-)
-final_story = response.choices[0].message.content.strip()
+            response = client.chat.completions.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": prompt_text}],
+                temperature=0.8,
+                max_tokens=2048
+            )
+            final_story = response.choices[0].message.content.strip()
             cleaned_story = clean_script_for_tts(final_story)
             word_count = len(cleaned_story.split())
 
