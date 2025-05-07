@@ -6,7 +6,7 @@ import re
 from openai import OpenAI
 from pydub import AudioSegment
 from io import BytesIO
-
+client = OpenAI(api_key="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")
 def clean_script_for_tts(raw_script: str) -> str:
     cleaned_lines = []
     for line in raw_script.split("\n"):
@@ -37,7 +37,6 @@ if st.button("🎙️ Generate My Story"):
         )
 
         try:
-            client = OpenAI(api_key="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")
             response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": prompt_text}],
