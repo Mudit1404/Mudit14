@@ -1,102 +1,84 @@
-
 import streamlit as st
-import google.generativeai as genai
+import openai
 from gtts import gTTS
 import os
 import re
 from pydub import AudioSegment
 from io import BytesIO
 
-
+# Function to clean text
 def clean_script_for_tts(raw_script: str) -> str:
     cleaned_lines = []
     for line in raw_script.split("\n"):
         line = line.strip()
-
-        # Skip lines that are only sound cues or formatting
-        if re.fullmatch(r"\*.*?\*", line):
+        if re.fullmatch(r"\*.*?\*", line) or re.fullmatch(r"\(.*?\)", line) or not line:
             continue
-        if re.fullmatch(r"\(.*?\)", line):
-            continue
-        if not line:
-            continue
-
-        # Remove inline sound cues like *footsteps*
         line = re.sub(r"\*.*?\*", "", line)
         line = re.sub(r"\(.*?\)", "", line)
-
-        # Only keep non-empty, clean lines
         if line.strip():
             cleaned_lines.append(line)
-
     return " ".join(cleaned_lines)
 
-
-# Gemini setup
-genai.configure(api_key="AIzaSyDUmKqoKz6_hegpYZMm6sTiGyvmYnEklVk")
-
+# Streamlit UI
 st.title("🎧 KUKU Companion – Personalized Audio Stories")
 
-# User Inputs
+openai_api_key = st.text_input("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", type="password")
 mood = st.selectbox("What's your current mood?", ["Motivated", "Calm", "Romantic", "Curious", "Emotional"])
 story_lang = st.radio("Choose story language:", ["English", "Hindi"])
 
 if st.button("🎙️ Generate My Story"):
+    if not openai_api_key:
+        st.error("Please enter your OpenAI API key.")
+        st.stop()
+
+    openai.api_key = openai_api_key
+
     with st.spinner("Crafting your immersive long story..."):
         prompt_text = (
             f"Write a deep, immersive audio story in {story_lang.lower()} for someone feeling {mood.lower()}. "
-            f"The story should be suitable for a 10-minute narration (at least 1000–1200 words). "
+            f"The story should be suitable for a 10-minute narration (around 1000–1200 words). "
             f"Include layered storytelling with chapters or emotional phases. "
             f"Use rich descriptions, natural dialogue, and an engaging progression of events. "
-            f"Subtly weave in sound cues like *light footsteps*, *wind whispering*, *rain falling*, *heartbeats*, etc., to enhance the immersion. "
-            f"Write in a poetic and engaging tone that feels like it is being personally told to the listener. "
-            f"No technical instructions, just natural storytelling as for an audio drama."
+            f"Subtly weave in sound cues like *light footsteps*, *wind whispering*, *rain falling*, *heartbeats*, etc. "
+            f"Write in a poetic, engaging tone like an audio drama. Do not include instructions or technical content."
         )
 
-        model = genai.GenerativeModel("gemini-1.5-pro-latest")
-
-        max_retries = 2
-        final_story = ""
-        cleaned_story = ""
-        word_count = 0
-
-        for attempt in range(max_retries):
-            response = model.generate_content(prompt_text)
-            final_story = response.text.strip()
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": prompt_text}],
+                temperature=0.8,
+                max_tokens=2048
+            )
+            final_story = response.choices[0].message.content.strip()
             cleaned_story = clean_script_for_tts(final_story)
             word_count = len(cleaned_story.split())
 
-            if word_count >= 500:
-                break
+            if word_count < 150:
+                st.error("The generated story is too short. Please try again.")
+                st.stop()
 
-        if word_count < 150:
-            st.error("The generated story is too short even after retries. Please try again later.")
-            st.stop()
+            st.subheader("📖 Original Story")
+            st.text_area("", final_story, height=300)
 
-        st.subheader("📖 Original Story")
-        st.text_area("", final_story, height=300)
+            st.subheader("🧼 Cleaned Story for Audio")
+            st.text_area("", cleaned_story, height=200)
 
-        st.subheader("🧼 Cleaned Story for Audio")
-        st.text_area("", cleaned_story, height=200)
+            # Background music paths (ensure filenames are lowercase)
+            mood_music_paths = {
+                "motivated": "bg_music/motivated.mp3",
+                "calm": "bg_music/calm.mp3",
+                "romantic": "bg_music/romantic.mp3",
+                "curious": "bg_music/curious.mp3",
+                "emotional": "bg_music/emotional.mp3"
+            }
 
-        # Background music paths (ensure filenames are all lowercase!)
-        mood_music_paths = {
-            "motivated": "bg_music/motivated.mp3",
-            "calm": "bg_music/calm.mp3",
-            "romantic": "bg_music/romantic.mp3",
-            "curious": "bg_music/curious.mp3",
-            "emotional": "bg_music/emotional.mp3"
-        }
-
-        try:
-            # Generate speech
+            # Generate TTS
             lang_code = "hi" if story_lang == "Hindi" else "en"
             tts = gTTS(text=cleaned_story, lang=lang_code)
-
             speech_io = BytesIO()
             tts.write_to_fp(speech_io)
             speech_io.seek(0)
-
             speech_audio = AudioSegment.from_mp3(speech_io)
 
             # Load background music
@@ -104,14 +86,13 @@ if st.button("🎙️ Generate My Story"):
             bg_music_path = mood_music_paths.get(mood_key)
 
             if not bg_music_path or not os.path.exists(bg_music_path):
-                raise FileNotFoundError(f"Background music for mood '{mood}' not found at {bg_music_path}")
+                raise FileNotFoundError(f"Background music not found for mood: {mood}")
 
-            bg_audio = AudioSegment.from_mp3(bg_music_path)
-            bg_audio = bg_audio - 10  # lower bg music volume
+            bg_audio = AudioSegment.from_mp3(bg_music_path) - 10
             bg_audio = bg_audio * (len(speech_audio) // len(bg_audio) + 1)
             bg_audio = bg_audio[:len(speech_audio)]
 
-            # Combine and export to memory
+            # Combine and export
             final_audio = speech_audio.overlay(bg_audio)
             output_io = BytesIO()
             final_audio.export(output_io, format="mp3")
