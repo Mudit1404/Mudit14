@@ -6,7 +6,20 @@ import re
 from openai import OpenAI
 from pydub import AudioSegment
 from io import BytesIO
-client = OpenAI(api_key="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")
+from dotenv import load_dotenv
+
+# Load environment variables from a .env file
+load_dotenv()
+
+# Fetch API key from environment variables
+api_key = os.getenv("OPENAI_API_KEY")
+
+if not api_key:
+    st.error("API Key not found! Please add it to your .env file.")
+    st.stop()
+
+client = OpenAI(api_key=api_key)
+
 def clean_script_for_tts(raw_script: str) -> str:
     cleaned_lines = []
     for line in raw_script.split("\n"):
@@ -57,6 +70,7 @@ if st.button("🎙️ Generate My Story"):
             st.subheader("🧼 Cleaned Story for Audio")
             st.text_area("", cleaned_story, height=200)
 
+            # Background music paths
             mood_music_paths = {
                 "motivated": "bg_music/motivated.mp3",
                 "calm": "bg_music/calm.mp3",
@@ -72,6 +86,7 @@ if st.button("🎙️ Generate My Story"):
             speech_io.seek(0)
             speech_audio = AudioSegment.from_mp3(speech_io)
 
+            # Check if background music exists for the selected mood
             mood_key = mood.lower()
             bg_music_path = mood_music_paths.get(mood_key)
 
@@ -90,5 +105,9 @@ if st.button("🎙️ Generate My Story"):
             st.subheader("🔊 Your Personalized Audio with Background Music")
             st.audio(output_io)
 
+        except openai.error.OpenAIError as e:
+            st.error(f"OpenAI API error: {e}")
+        except FileNotFoundError as e:
+            st.error(str(e))
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
