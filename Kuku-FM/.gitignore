@@ -1,0 +1,20 @@
+# Environment files
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Audio files
+*.mp3
+*.wav
+
+# Jupyter and notebook stuff
+.ipynb_checkpoints
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Streamlit-specific
+.streamlit/secrets.toml
