@@ -3,6 +3,7 @@ import openai
 from gtts import gTTS
 import os
 import re
+from openai import OpenAI
 from pydub import AudioSegment
 from io import BytesIO
 
