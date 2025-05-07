@@ -6,10 +6,6 @@ import re
 from openai import OpenAI
 from pydub import AudioSegment
 from io import BytesIO
-from dotenv import load_dotenv
-
-# Load environment variables from a .env file
-load_dotenv()
 
 # Fetch API key from environment variables
 api_key = os.getenv("OPENAI_API_KEY")
