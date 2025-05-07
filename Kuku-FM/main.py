@@ -1,19 +1,12 @@
 import streamlit as st
+import openai
+from gtts import gTTS
 import os
 import re
-from gtts import gTTS
+from openai import OpenAI
 from pydub import AudioSegment
 from io import BytesIO
-from openai import OpenAI
-
-# Get API key from environment variable
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    st.error("⚠️ OPENAI_API_KEY environment variable not found. Set it in your environment or GitHub Secrets.")
-    st.stop()
-
-client = OpenAI(api_key=api_key)
-
+client = OpenAI(api_key="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")
 def clean_script_for_tts(raw_script: str) -> str:
     cleaned_lines = []
     for line in raw_script.split("\n"):
