@@ -37,7 +37,7 @@ if st.button("🎙️ Generate My Story"):
         )
 
         try:
-            client = OpenAI(api_key="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")
+            client = OpenAI(api_key="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")
             response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": prompt_text}],
