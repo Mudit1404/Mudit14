@@ -6,7 +6,9 @@ import re
 from pydub import AudioSegment
 from io import BytesIO
 
-# Function to clean text
+# 🔐 Set your OpenAI API key here (or load from env)
+openai.api_key = "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"  # Replace with your actual key
+
 def clean_script_for_tts(raw_script: str) -> str:
     cleaned_lines = []
     for line in raw_script.split("\n"):
@@ -22,17 +24,10 @@ def clean_script_for_tts(raw_script: str) -> str:
 # Streamlit UI
 st.title("🎧 KUKU Companion – Personalized Audio Stories")
 
-openai_api_key = st.text_input("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", type="password")
 mood = st.selectbox("What's your current mood?", ["Motivated", "Calm", "Romantic", "Curious", "Emotional"])
 story_lang = st.radio("Choose story language:", ["English", "Hindi"])
 
 if st.button("🎙️ Generate My Story"):
-    if not openai_api_key:
-        st.error("Please enter your OpenAI API key.")
-        st.stop()
-
-    openai.api_key = openai_api_key
-
     with st.spinner("Crafting your immersive long story..."):
         prompt_text = (
             f"Write a deep, immersive audio story in {story_lang.lower()} for someone feeling {mood.lower()}. "
@@ -64,7 +59,6 @@ if st.button("🎙️ Generate My Story"):
             st.subheader("🧼 Cleaned Story for Audio")
             st.text_area("", cleaned_story, height=200)
 
-            # Background music paths (ensure filenames are lowercase)
             mood_music_paths = {
                 "motivated": "bg_music/motivated.mp3",
                 "calm": "bg_music/calm.mp3",
@@ -73,7 +67,6 @@ if st.button("🎙️ Generate My Story"):
                 "emotional": "bg_music/emotional.mp3"
             }
 
-            # Generate TTS
             lang_code = "hi" if story_lang == "Hindi" else "en"
             tts = gTTS(text=cleaned_story, lang=lang_code)
             speech_io = BytesIO()
@@ -81,7 +74,6 @@ if st.button("🎙️ Generate My Story"):
             speech_io.seek(0)
             speech_audio = AudioSegment.from_mp3(speech_io)
 
-            # Load background music
             mood_key = mood.lower()
             bg_music_path = mood_music_paths.get(mood_key)
 
@@ -92,7 +84,6 @@ if st.button("🎙️ Generate My Story"):
             bg_audio = bg_audio * (len(speech_audio) // len(bg_audio) + 1)
             bg_audio = bg_audio[:len(speech_audio)]
 
-            # Combine and export
             final_audio = speech_audio.overlay(bg_audio)
             output_io = BytesIO()
             final_audio.export(output_io, format="mp3")
