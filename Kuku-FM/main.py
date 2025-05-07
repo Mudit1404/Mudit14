@@ -32,7 +32,7 @@ def clean_script_for_tts(raw_script: str) -> str:
 
 
 # Gemini setup
-genai.configure(api_key="AIzaSyBqSSu4DlfaSD4Kcpe-hQR5Px8o7e_blKA")
+genai.configure(api_key="AIzaSyAa_-EuroCcNw3Ed27kujT_LqPXjKlt1lU")
 
 st.title("🎧 KUKU Companion – Personalized Audio Stories")
 
