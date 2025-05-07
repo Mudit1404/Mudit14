@@ -1,4 +1,5 @@
 streamlit
+openai
+gTTS
 pydub
-gtts
-ffmpeg-python
+python-dotenv
