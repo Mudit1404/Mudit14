@@ -39,7 +39,7 @@ if st.button("🎙️ Generate My Story"):
         )
 
         try:
-            response = client.chat.completions.create(
+            response = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": prompt_text}],
                 temperature=0.8,
