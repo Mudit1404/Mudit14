@@ -28,7 +28,7 @@ def get_default_cryptos():
 
 @app.get("/stock/{symbol}")
 def get_stock_price(symbol: str):
-    API_KEY = "E51WWVGBCDS1VHDP"
+    API_KEY = "ADD_YOUR_API_KEY"
     url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={API_KEY}"
     response = requests.get(url)
     data = response.json()
